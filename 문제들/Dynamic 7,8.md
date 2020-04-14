@@ -84,6 +84,55 @@ int main() {
 }
 ```
 
+
+
+```c++
+#include <string>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+int arr[21][21];
+int dp[21][21];
+int N;
+
+int main() {
+	ios_base::sync_with_stdio(false);
+	cin >> N;
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			cin >> arr[i][j];
+		}
+	}
+	dp[0][0] = arr[0][0];
+	for (int i = 1; i < N; i++) {
+		dp[0][i] = dp[0][i - 1] + arr[0][i];
+		dp[i][0] = dp[i - 1][0] + arr[i][0];
+	}
+	for (int i = 1; i < N; i++) {
+		for (int j = 1; j < N; j++) {
+			if (dp[i - 1][j] < dp[i][j - 1]) {
+				dp[i][j] = dp[i - 1][j] + arr[i][j];
+			}
+			else {
+				dp[i][j] = dp[i][j-1] + arr[i][j];
+			}
+		}
+	}
+	cout << dp[N - 1][N - 1];
+	return 0;
+}
+```
+
+
+
+
+
+
+
 # 8
 
 ### 40인의 도둑 (Top-Down)
@@ -142,3 +191,49 @@ int main() {
 	return 0;
 }
 ```
+
+
+
+**정답 코드**
+
+
+
+```c++
+#include <string>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+int arr[21][21];
+int dp[21][21];
+int N;
+
+int dfs(int x, int y) {
+	if (dp[x][y]) return dp[x][y];
+	if (x == 0) {
+		return dp[x][y] = dfs(x, y - 1) + arr[x][y];
+	}
+	else if (y == 0) {
+		return dp[x][y] = dfs(x - 1, y) + arr[x][y];
+	}
+
+	return dp[x][y] = min(dfs(x - 1, y), dfs(x, y - 1)) + arr[x][y];
+}
+
+int main() {
+	ios_base::sync_with_stdio(false);
+	cin >> N;
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			cin >> arr[i][j];
+		}
+	}
+	dp[0][0] = arr[0][0];
+	cout << dfs(N-1,N-1);
+	return 0;
+}
+```
+
