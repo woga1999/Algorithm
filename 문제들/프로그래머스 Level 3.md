@@ -115,3 +115,107 @@ int solution(int N, int number) {
     return answer;
 }
 ```
+
+
+
+## 브라이언의 고민(못품)
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/1830)
+
+```c++
+#include <string>
+#include <unordered_set>
+
+using namespace std;
+
+// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
+string solution(string sen) {
+    string answer = "";
+    unordered_set<char> used;
+    char cur =' ';
+    bool second = false;
+    int cnt=0;
+    for(int i=0; i<sen.size(); i++){
+        if(sen[i]>='A' && sen[i] <='Z'){
+            cnt++;
+            if(cnt>1 && !second) answer += " ";
+            answer += sen[i];
+        }
+        else{
+            cnt--;
+            if(cur != sen[i]) {
+                cur = sen[i];
+                if(i>3) cnt -= 2;
+                if(used.count(cur)>0) {
+                    return "invalid";
+                }else used.insert(cur);
+            }
+            if(cnt < 0){
+                second = true;
+                answer += " ";
+            }else if(cnt> 0 && second){
+                second = false;
+            }
+        }
+    }
+    if (cnt < 0) return "invalid";
+    return answer;
+}
+```
+
+이런 식으로 풀었다.
+
+### **예제에 대한 설명**
+
+첫 번째 테스트 케이스는 문제 설명에 제시된 데이터와 같다.두 번째 테스트 케이스에서, 기호 `q`는 규칙 1, 혹은 규칙 2에 의해 추가된 기호일 수 있다. 규칙 1에 해당하는 경우 원문은 `SIGONG JOA`로 예제 출력과 같으며, 규칙 2에 해당하는 경우의 원문인 `SIGONG J O A`도 올바른 답이다.세 번째 테스트 케이스에서 `x`는 규칙 1에 의해 추가된 기호여야 한다. (규칙 2에 의해 추가되었다면 기호가 단어 앞뒤에 붙게 되므로 2개여야 한다.) 그러므로 `AAAA`가 한 단어여야 한다. 마찬가지로 `o`도 규칙 1에 의해 추가된 기호여야 하기 때문에 `ABBB`가 한 단어여야 한다. 이는 동시에 만족할 수 없는 조건이므로 주어진 문구는 규칙을 만족할 수 없게 된다. 따라서 `invalid`를 리턴한다.
+
+→ 이러길래 나는 후자인 "SIGONG J O A"로 해서 한건데 이런 틀렸다고 나온다.
+
+```
+알림: '실행'을 눌렀을 시 올바른 코드가 틀린 결과로 표시되는 경우가 있습니다. 하단의 설명을 참고해주세요.
+```
+
+가 ㅇ상단에 적혀있긴 한다.
+
+하지만 코드 채점하고 제출하니깐 틀렸다..
+
+[프로그래머스 : 브라이언의 고민](https://hackerjacob.tistory.com/92)
+
+이분은 이렇게 풀었는데 넘 김..
+
+## 타일 장식물
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/43104)
+
+DP 이용하는 대표적인 문제인듯
+
+```c++
+#include <string>
+#include <vector>
+
+using namespace std;
+
+long long dp[81];
+long long solution(int N) {
+    long long answer = 0;
+    dp[1] = 1;
+    dp[2] = 1;
+    for(int i=3; i<=N; i++){
+        dp[i] = dp[i-1] + dp[i-2];
+    }
+    long long h = dp[N];
+    long long w = dp[N-1] + dp[N];
+    answer = (h+w) * 2;
+    return answer;
+}
+```
+
+효율성/ 정확성 다 만점~ㅎㅎ
+
+## 자물쇠와 열쇠
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/60059)
+
+다시 풀어볼것!
+
+[프로그래머스 [2020카카오공채\] 자물쇠와 열쇠 c++](https://regularmember.tistory.com/186)
