@@ -219,3 +219,60 @@ long long solution(int N) {
 다시 풀어볼것!
 
 [프로그래머스 [2020카카오공채\] 자물쇠와 열쇠 c++](https://regularmember.tistory.com/186)
+
+- core jumped 코드 location 함수에서 잘못함ㅋㅋ
+
+locationKey 함수를 고쳐줌
+
+73/100
+
+38개 중에 12개 틀림..
+
+```c++
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<vector<int>> key;
+
+void locationKey(vector<vector<int>> k, int size){
+    for(int i=0; i<k.size(); i++){
+        for(int j=0; j<k[i].size(); j++){
+            key[i][j] = k[size-j-1][i];
+        }
+    }
+}
+bool solution(vector<vector<int>> ke, vector<vector<int>> lock) {
+    bool answer = true;
+    key = ke;
+    int keysize = key.size();
+    int locksize = lock.size();
+    int N = locksize + (keysize-1)*2;
+    vector<vector<int>> board(N, vector<int> (N,0));
+    for(int i1=keysize-1,i2=0; i1<keysize-1+locksize,i2<locksize; i1++,i2++){
+        for(int j1=keysize-1,j2=0; j1<keysize-1+locksize,j2<lock[i2].size(); j1++,j2++){
+            board[i1][j1] = lock[i2][j2];
+        }
+    }
+    
+    for(int k=0; k<4; k++){
+        for(int i=0; i<N; i++){
+            for(int j=0; j<N; j++){
+            for(int l=0+i; l<i+keysize; l++){
+                for(int m=0+i; m<i+keysize; m++){
+                    if(key[l][m]+board[i][j] == 1 && key[l][m] ==1){
+                        return true;
+                    }
+                }
+            }
+            }
+        }
+        locationKey(ke,keysize);
+        ke = key;
+    }
+    return false;
+}
+```
+
+모르겠따 false가 잘 안나오는 건가
