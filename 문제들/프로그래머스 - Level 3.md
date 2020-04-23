@@ -276,3 +276,240 @@ bool solution(vector<vector<int>> ke, vector<vector<int>> lock) {
 ```
 
 모르겠따 false가 잘 안나오는 건가
+
+
+
+## 섬 연결하기
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/42861)
+
+- 흠.. 첫번째 시도 : dfs 틀렸다
+
+
+
+\#include <string> #include <vector> #include <algorithm>
+
+```c++
+using namespace std;
+
+struct a{
+    int x,y,cost;
+    a(int b, int c, int d){
+        x = b;
+        y = c;
+        cost= d;
+    }
+    bool operator<(a &d){
+        return cost < d.cost;
+    }
+};
+
+bool checkIsland(vector<bool> ch, int N){
+    for(int i=0; i<N; i++){
+        if(!ch[i]) return false;
+    }
+    return true;
+}
+
+int solution(int n, vector<vector<int>> costs) {
+    int answer = 0;
+    vector<bool> ch(n);
+    vector<a> island;
+    for(int i=0; i<costs.size(); i++){
+        int x = costs[i][0];
+        int y = costs[i][1];
+        int c = costs[i][2];
+        island.push_back(a(x,y,c));
+    }
+    sort(island.begin(), island.end());
+    ch[island[0].x] = true;
+    for(int i=0; i<island.size(); i++){
+        if(!ch[island[i].y]){
+            ch[island[i].y] = true;
+            answer += island[i].cost;
+        }
+       if(checkIsland(ch,n)) break;
+    }
+    return answer;
+}
+```
+
+이렇게 풀었는데 1개 맞음ㅋㅋㅋㅋ ㅜㅜ 뭐임
+
+**크루스칼로 풀었다 Union&Find 사용..**
+
+다시 공부해야할듯 크루스칼.. 아 이거 dfs로도 충분히 가능할것같았는데 아쉽다
+
+```c++
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+struct Data{
+    int x,y,cost;
+    Data(int a,int b, int c){
+        x = a;
+        y = b;
+        cost = c;
+    }
+    bool operator<(Data &d){
+        return cost < d.cost;
+    }
+};
+int arr[101];
+int res;
+
+int Find(int v){
+    if(v==arr[v]) return v;
+    else return arr[v] = Find(arr[v]);
+}
+
+void Union(int a,int b, int c){
+    a = Find(a);
+    b = Find(b);
+    if(a != b){
+        arr[a] = b;
+        res += c;
+    }
+}
+
+int solution(int n, vector<vector<int>> costs) {
+    int answer = 0;
+    for(int i=0; i<n; i++){
+        arr[i] = i;
+    }
+    vector<Data> island;
+    for(int i=0; i<costs.size(); i++){
+        int x = costs[i][0];
+        int y = costs[i][1];
+        int c = costs[i][2];
+        island.push_back(Data(x,y,c));
+    }
+    sort(island.begin(), island.end());
+    for(int i=0; i<island.size(); i++){
+        Union(island[i].x,island[i].y,island[i].cost);
+    }
+    answer = res;
+    return answer;
+}
+```
+
+→ 다시 공부함
+
+
+
+
+
+## 디스크 컨트롤러
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/42627)
+
+힙 이용해서 풀었는데..흠...
+
+
+
+`10점`
+
+```c++
+#include <string>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+struct process{
+    int start, total;
+    process(int x,int t){
+        start = x;
+        total = t;
+    }
+    bool operator<(const process &d)const{
+        if(total == d.total) return start > d.start;
+        return total > d.total;
+    }
+};
+
+int solution(vector<vector<int>> jobs) {
+    int answer = 0;
+    priority_queue<process> pq;
+    int start = 0;
+    int total = 0;
+    for(int i=0; i<jobs.size(); i++){
+        if(jobs[i][0] == 0){
+            start = jobs[i][0];
+            total = jobs[i][1];
+        }
+        else pq.push(process(jobs[i][0],jobs[i][1]));
+    }
+    start = total;
+    while(!pq.empty()){
+        int barS = pq.top().start;
+        int barVal = pq.top().total;
+        pq.pop();
+        total += (start - barS) + barVal;
+        start += barVal;
+    }
+    answer = total / jobs.size();
+    return answer;
+}
+```
+
+10점 맞음ㅋㅋ
+
+
+
+`25점`
+
+```c++
+
+#include <string>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+struct process{
+    int start, total;
+    process(int x,int t){
+        start = x;
+        total = t;
+    }
+    bool operator<(const process &d)const{
+        if(d.total == total) return start > d.start;
+        else return total > d.total;
+    }
+};
+bool comp(vector<int> a, vector<int> b){
+    return a[0] < b[0];
+}
+
+int solution(vector<vector<int>> jobs) {
+    int answer = 0;
+    priority_queue<process> pq;
+    int spend = 0;
+    int total = 0;
+    sort(jobs.begin(), jobs.end(), comp);
+    for(int i=0; i<jobs.size(); i++){
+        if(i == 0){
+            spend = jobs[i][0];
+            total = jobs[i][1]+spend;
+        }
+        else pq.push(process(jobs[i][0],jobs[i][1]));
+    }
+    answer = total;
+    while(!pq.empty()){
+        int barS = pq.top().start;
+        int barVal = pq.top().total;
+        pq.pop();
+        spend = total - barS;
+        total += barVal;
+        answer += (spend+barVal);
+    }
+    answer /= jobs.size();
+    return answer;
+}
+```
+
