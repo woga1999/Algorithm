@@ -513,3 +513,207 @@ int solution(vector<vector<int>> jobs) {
 }
 ```
 
+
+
+
+
+## 예산
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/43237)
+
+- 테스트 9번만 틀림
+
+  효율성/ 정확성 다 맞았는데
+
+  정확성에서 테스트 9번만 틀렸음..
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  int solution(vector<int> budgets, int M) {
+      int answer = 0;
+      int left = 987654321;
+      int right = -1;
+      for(int i=0; i<budgets.size(); i++){
+          if(left > budgets[i]){
+              left = budgets[i];
+          }
+          if(right < budgets[i]){
+              right = budgets[i];
+          }
+      }
+      vector<int> tmp = budgets;
+      int valMax = -1;
+      int mid =0;
+      while(left <=right){
+          mid = (left + right) / 2;
+          int total=0;
+          for(int i=0; i<budgets.size(); i++){
+              if(mid<budgets[i]){
+                  budgets[i] = mid;
+              }
+              total += budgets[i];
+          }
+          if(total > M){
+              right = mid-1;
+          }else if(total<M){
+              if(total > valMax){
+                  answer = mid;
+                  valMax = total;
+              }
+              left = mid+1;
+          }
+          else if(total == M){
+              answer = mid;
+              break;
+          }
+          budgets = tmp;
+      }
+      return answer;
+  }
+  ```
+
+원인을 모르겠따!
+
+budgets = [9, 8, 5, 6, 7] M = 5 일 때, 그러니까 최저 예산이 (총 예산 / 도시의 수)보다 클 때의 경우의 수 처리가 빠진것 같습니다. 라는 답변을 보았다
+
+뭔소리지
+
+
+
+## 가장 먼 노드
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/49189)
+
+- 정답!
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <queue>
+  
+  using namespace std;
+  
+  int dis[20001];
+  bool ch[20001];
+  
+  int solution(int n, vector<vector<int>> edge) {
+      int answer = 0;
+      vector<int> node[200001];
+      for(int i=0; i<edge.size(); i++){
+          int x = edge[i][0];
+          int y = edge[i][1];
+          node[x].push_back(y);
+          node[y].push_back(x);
+      }
+      queue<int> q;
+      q.push(1);
+      ch[1] = true;
+      while(!q.empty()){
+          int index = q.front();
+          q.pop();
+          for(int i=0; i<node[index].size(); i++){
+              if(ch[node[index][i]]) continue;
+              ch[node[index][i]] = true;
+              q.push(node[index][i]);
+              dis[node[index][i]] = dis[index] + 1;
+          }
+      }
+      int max = -1;
+      for(int i=2; i<= n; i++){
+          if(max < dis[i]) max = dis[i];
+      }
+      for(int i=2; i<= n; i++){
+          if(max==dis[i]) answer++;
+      }
+      return answer;
+  }
+  ```
+
+
+
+
+
+## 단속카메라
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/42884)
+
+- 빵점.. 예제 테케는 맞음
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  bool ch[10001];
+  
+  bool comp(vector<int> a, vector<int> b){
+      return a[0] < b[0];
+  }
+  
+  bool isAllTrue(int n){
+      for(int i=0; i<n; i++){
+          if(!ch[i]) return false;
+      }
+      return true;
+  }
+  
+  int solution(vector<vector<int>> routes) {
+      int answer = 1;
+      sort(routes.begin(), routes.end(), comp);
+      for(int i=0; i<routes.size(); i++){
+          if(ch[i]) continue;
+          bool flag = false;
+          int index = i+1;
+          int start = routes[i][0];
+          int end = routes[i][1];
+          while(index <routes.size()){
+              if(start <= routes[index][0] && end >= routes[index][1]){
+                  ch[index] = true;
+                  index++;
+              }
+              else break;
+          }
+          if(!isAllTrue(routes.size())) answer++;
+      }
+      return answer;
+  }
+  ```
+
+
+
+[[프로그래머스\] 단속카메라](https://ga0n.tistory.com/entry/프로그래머스-단속카메라)
+
+이 분걸 참고했고 접근법은 맞다! 근데 과정에서 카메라 비교에 대한 생각이 틀렸음
+
+근데 잘 이해안됨.. 대충 내가 생각한대로 겹치는 바들을 한 감시카메라로 놓고 중복 범위 넘어가는 바들은 ++해서 새로운 감시카메라를 놓고 갈 준비를 함
+
+- 정답 소스
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  int solution(vector<vector<int>> routes) {
+      int answer = 1;
+      sort(routes.begin(), routes.end());
+      int camera = routes[0][1];
+      for(int i=0; i<routes.size()-1; i++){
+          if(camera > routes[i][1]) camera = routes[i][1]; //카메라 위치가 너무 앞서가서 위치조정
+          if(camera < routes[i+1][0]){
+              answer++; //단속카메라 새로 놓아야하고
+              camera = routes[i+1][1]; //다음 이동경로 진출지점으로 카메라 위치 조정
+          }
+      }
+      return answer;
+  }
+  ```
+
