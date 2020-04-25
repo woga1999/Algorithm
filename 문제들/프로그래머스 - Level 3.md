@@ -1,4 +1,12 @@
-# 프로그래머스 - Level 3
+다른 사람 풀이 보니깐 멀티셋 사용한 사람도 있음 중복허용, set의 알아서 정렬 특성을 사용.
+
+```cpp
+if(sub=="I ") que.insert(stoi(s.substr(2,s.length()-2))); 
+else if(s.substr(2,1)=="1"&&que.size()>0) { que.erase(--que.end()); }
+else if(que.size()>0) { que.erase(que.begin()); }
+```
+
+이런식으로 사용함 호오..프로그래머스 - Level 3
 
 ## 종이접기
 
@@ -717,3 +725,224 @@ budgets = [9, 8, 5, 6, 7] M = 5 일 때, 그러니까 최저 예산이 (총 예�
   }
   ```
 
+
+
+## 정수 삼각형
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/43105)
+
+- 정답
+
+  이게 대분류가 DP라서 어떻게 DP로 풀까 많이 고민했다 0에서 먼저 시작하려했는데 그럼 답이 안나와서 삼각형 끝단에서 시작
+
+  정확성 효율성 다 맞았다!
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  int dp[500][500];
+  
+  int solution(vector<vector<int>> triangle) {
+      int answer = 0;
+      int N = triangle.size();
+      for(int i=0; i<triangle[N-1].size(); i++){
+          dp[N-1][i] = triangle[N-1][i];
+      }
+      for(int i=triangle.size()-1; i>0; i--){
+          for(int j=0; j<triangle[i].size(); j++){
+              if(j != 0 && j != triangle[i].size()-1){
+                  if(dp[i-1][j-1] < dp[i][j] + triangle[i-1][j-1]){
+                      dp[i-1][j-1] = dp[i][j] + triangle[i-1][j-1];
+                  }
+                  if(dp[i-1][j] < dp[i][j] + triangle[i-1][j]){
+                      dp[i-1][j] = dp[i][j] + triangle[i-1][j];
+                  }
+              }else if(j==0){
+                  if(dp[i-1][j] < dp[i][j] + triangle[i-1][j]){
+                      dp[i-1][j] =  dp[i][j] + triangle[i-1][j];
+                  }
+              }else{
+                  if(dp[i-1][j-1] < dp[i][j] + triangle[i-1][j-1]){
+                      dp[i-1][j-1] = dp[i][j] + triangle[i-1][j-1];
+                  }
+              }
+          }
+      }
+      answer = dp[0][0];
+      return answer;
+  }
+  ```
+
+흠.. 다른 사람들 풀이 보는데 내가 너무 복잡하게 생각한듯, 내가 첨에 생각한 0에서 시작이 0,0으로 두고 시작해도 답 나옴 난 처음에 일차원배열로 하려고 해서 그런듯!
+
+첨에 생각했듯이 대신 0,0으로 하면 나머지 끝단 dp 값들에서 max 값 비교해서 뽑아내야 함!
+
+
+
+
+
+## 이중우선순위큐
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/42628)
+
+- 정답
+
+  첨에 아 우선순위 큐 놓고 다른 큐 만들어서 뺴고 먹고 해야하나?하다가 vector<int>로 그대로하자! 했다가 빼려면 또다시 for문을 돌려야한다는 걸 알고 덱을 사용함
+
+  하다보니깐 코드가 좀 드러워졌는데.. 문자열에 뭐가 포함되었는지 확인할떄 **find(string) ≠ -1** 을 기억하자~
+
+  만점!
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  #include <deque>
+  
+  using namespace std;
+  
+  vector<int> solution(vector<string> operations) {
+      vector<int> answer;
+      deque<int> a;
+      for(int i=0; i<operations.size(); i++){
+          if(operations[i] == "D 1" && !a.empty()){
+              a.pop_back();
+          }else if(operations[i] == "D -1" && !a.empty()){
+              a.pop_front();
+          }else if(operations[i].find("I") != -1){
+              string tmp = operations[i].substr(2);
+              int data = stoi(tmp);
+              a.push_back(data);
+              if(a.size()>0)sort(a.begin(), a.end());
+          }
+      }
+      if (a.size() > 0) {
+  		sort(a.begin(), a.end());
+  		answer.push_back(a[a.size()-1]);
+  		answer.push_back(a[0]);
+  	}
+  	else {
+  		answer.push_back(0);
+  		answer.push_back(0);
+  	}
+      return answer;
+  }
+  ```
+
+다른 사람 풀이 보니깐 멀티셋 사용한 사람도 있음 중복허용, set의 알아서 정렬 특성을 사용.
+
+```cpp
+if(sub=="I ") que.insert(stoi(s.substr(2,s.length()-2))); 
+else if(s.substr(2,1)=="1"&&que.size()>0) { que.erase(--que.end()); }
+else if(que.size()>0) { que.erase(que.begin()); }
+```
+
+이런식으로 사용함 호오..
+
+
+
+## 입국심사
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/43238)
+
+-자의로 못풀었다
+
+-결국 블로그 보고 참고!
+
+[프로그래머스_입국심사](https://woongsin94.tistory.com/185)
+
+카테고리가 대분류고 시간을 도출하는 문제길래 이분탐색인건 알겠는데 문제는 시간 타겟을 정하고 어떻게 판별해야하는지 생각이 안났다.
+
+블로그에서 `추정 시간값/ 각 심사관별 심사시간 = 심사관당 맡을 수 있는 입국자 수` 를 보고 아차! 싶었다. target분 내에 해결하는 수들이 n이면 되는거다!
+
+- 해서 풀었는데 44/100 틀림 왜틀린거지..
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  long long solution(int n, vector<int> times) {
+      long long answer = 0;
+      sort(times.begin(), times.end());
+      long long left = times[0];
+      long long right = times[times.size()-1] * n;
+      while(left <=right){
+          long long mid = (left + right) / 2;
+          long long peopleTotal = 0;
+          for(int i=0; i<times.size(); i++){
+              peopleTotal += mid / times[i];
+          }
+          if(peopleTotal < n){
+              left = mid + 1;
+          }else{
+              right = mid -1;
+          }
+          answer = mid;
+      }
+      return answer;
+  }
+  ```
+
+- 한줄 추가로 88.9/100 테케 8번만 틀림
+
+  ```cpp
+  while(left <=right){
+          long long mid = (left + right) / 2;
+          long long peopleTotal = 0;
+          for(int i=0; i<times.size(); i++){
+              peopleTotal += mid / times[i];
+          }
+          if(peopleTotal < n){
+              left = mid + 1;
+          }else{
+              if(answer > mid) answer = mid; 
+              right = mid -1;
+          }
+      }
+  ```
+
+- 정답
+
+  `long long right = (long long)times[times.size()-1] * n;`
+
+  이걸 안해줘서 테케 8번이 계속 틀린거였다 *n해서 int 값을 넘어버리면 이상한 값이 나오니깐 캐스팅해줘야했던거임!!!!! 겨우 통과했다 결국 코드를 안보겠다는 다짐은 멀리 보내고 위 블로그 속 정답 코드와 비교했다
+
+  아무리 봐도 다른게 캐스팅 문제라 저거만 추가했더니 됐음.. 이 무슨..
+
+  최종 코드
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  long long solution(int n, vector<int> times) {
+      long long answer = 0;
+      sort(times.begin(), times.end());
+      long long left = times[0];
+      long long right = (long long)times[times.size()-1] * n;
+      answer = right;
+      while(left <=right){
+          long long mid = (left + right) / 2;
+          long long peopleTotal = 0;
+          for(int i=0; i<times.size(); i++){
+              peopleTotal += mid / times[i];
+          }
+          if(peopleTotal < n){
+              left = mid + 1;
+          }else{
+              if(answer > mid) answer = mid; 
+              right = mid -1;
+          }
+      }
+      return answer;
+  }
+  ```
