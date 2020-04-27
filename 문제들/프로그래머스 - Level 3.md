@@ -946,3 +946,212 @@ else if(que.size()>0) { que.erase(que.begin()); }
       return answer;
   }
   ```
+
+
+
+## 저울
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/42886)
+
+- 응 헛소리 코드
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  int solution(vector<int> weight) {
+      int answer = 0;
+      sort(weight.begin(),weight.end());
+      int total = 0;
+      for(int i=0; i<weight.size(); i++){
+          total += weight[i];
+      }
+      answer = (total - weight[weight.size()-1]) + weight[0];
+      
+      return answer;
+  }
+  ```
+
+- 테케 한개 빼고 다 시간초과 뜸
+
+  dfs 이용해서 1~weight 사이즈만큼 더할때 계산하고 set에 넣는다 그리고 하나씩 answer++하며 답을 찾아가는 과정을 거친다.
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  #include <set>
+  
+  using namespace std;
+  
+  vector<int> d[10000];
+  int N;
+  
+  void dfs(int index, int cnt, int n, int sum, vector<int> t) {
+  	if (cnt == n) {
+  		d[n - 1].push_back(sum);
+  		return;
+  	}
+  	if (index >= N) return;
+  	dfs(index + 1, cnt + 1, n, sum + t[index], t);
+  	dfs(index + 1, cnt, n, sum, t);
+  }
+  
+  int solution(vector<int> weight) {
+      int answer = 1;
+      N = weight.size();
+      sort(weight.begin(),weight.end());
+      int total = 0;
+      for(int i=0; i<weight.size(); i++){
+          total += weight[i];
+          d[0].push_back(weight[i]);
+      }
+      d[N-1].push_back(total);
+      int index =1;
+      while(index<N-1){
+          dfs(0, 0, index + 1,0,weight);
+          index++;
+      }
+      set<int> tmp;
+      for(int i=0; i<N; i++){
+          for(int j=0; j<d[i].size(); j++){
+              tmp.insert(d[i][j]);
+          }
+      }
+      
+      for(auto x : tmp){
+          if(x == answer) answer++;
+          else break;
+      }
+      return answer;
+  }
+  ```
+
+[프로그래머스 고득점 kit : 저울](https://sihyungyou.github.io/programmers-저울/)
+
+를 참고했고 진짜 쉬운거였다... 며칠 흐르고 다시 풀기!
+
+
+
+## 등굣길
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/42898)
+
+- 75/100
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  int map[101][101];
+  
+  int solution(int m, int n, vector<vector<int>> puddles) {
+      int answer = 0;
+      for(int i=1; i<=n; i++){
+          for(int j=1; j<=m ;j++){
+              map[i][j] = 1;
+          }
+      }
+      for(int i=0; i<puddles.size(); i++){
+          map[puddles[i][1]][puddles[i][0]] =0;
+      }
+       for(int i=2; i<=n; i++){
+          for(int j=2; j<=m ;j++){
+              if(map[i][j] ==0) continue;
+              map[i][j] = (map[i-1][j] + map[i][j-1]) % 1000000007;
+          }
+      }
+      
+      return map[n][m];
+  }
+  ```
+
+  정확성 테스트 1,9,10
+
+  효율성 테스트 1,7
+
+정답 풀이 보는데 나랑 비슷한데 다른점은 dp 배열과 puddles를 -1로 뒀다는 거고.. 왜 틀린지 몰겠음.. map 자체로 dp화하는 게 패착인가
+
+- 정답
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  int map[101][101];
+  int dp[101][101];
+  
+  int solution(int m, int n, vector<vector<int>> puddles) {
+      int answer = 0;
+      for(int i=0; i<puddles.size(); i++){
+          map[puddles[i][1]][puddles[i][0]] =-1;
+      }
+      dp[0][1] = 1;
+       for(int i=1; i<=n; i++){
+          for(int j=1; j<=m ;j++){
+              if(map[i][j] ==-1){
+                  dp[i][j] = 0;
+              }
+              else dp[i][j] = (dp[i-1][j] + dp[i][j-1])%1000000007;
+          }
+      }
+      
+      return dp[n][m];
+  }
+  ```
+
+
+
+
+
+## 순위
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/49191)
+
+처음 접근 : 패배한 애들만 nth[100]에서 ++해준다. win이면 변동없음
+
+근데 이걸 그래프로 어떻게 이용하는거지?
+
+다른 사람 정답 풀이 봤고 : 플로이드-와샬 알고리즘를 이용한다고 한다. 와우.. 생각지도 못한 알고리즘...
+
+- 정답 소스
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  bool battle[101][101];
+  
+  int solution(int n, vector<vector<int>> results) {
+      int answer = 0;
+      for(int i=0; i<results.size(); i++){
+          battle[results[i][0]][results[i][1]] = true;
+      }
+      for(int k=1; k<=n; k++){
+         for(int i=1; i<=n; i++){
+             for(int j=1; j<=n; j++){
+                 if(battle[i][k] && battle[k][j]) battle[i][j] = true;
+             }
+         }
+      }
+      for(int i=1; i<=n; i++){
+          int cnt =0;
+          for(int j=1; j<=n; j++){
+              if(battle[i][j] || battle[j][i]) cnt++;
+          }
+          if(cnt == n-1) answer++;
+      }
+      return answer;
+  }
+  ```
+
+다시 풀기!!!
