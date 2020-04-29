@@ -1034,6 +1034,42 @@ else if(que.size()>0) { que.erase(que.begin()); }
 
 를 참고했고 진짜 쉬운거였다... 며칠 흐르고 다시 풀기!
 
+- 다시 풀었는데 25점? 똑같은데 소스
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  int solution(vector<int> weight) {
+      int answer = 0;
+      sort(weight.begin(), weight.end());
+  		answer = weight[0];
+      for(int i=1; i<weight.size(); i++){
+          if(answer+1 >= weight[i]){
+              answer += weight[i];
+          }else{
+              answer++;
+              break;
+          }
+      }
+      
+      return answer;
+  }
+  ```
+
+  엥..ㅋㅋ엥??
+
+  answer++하고 break;하는게 아니라
+
+  break;하고 return answer+1; 로 하니깐 다 통과함 왜지? 다 똑같은데 왜 answer++해서 하는건 오류가 날까
+
+
+
+
+
 
 
 ## 등굣길
@@ -1155,3 +1191,174 @@ else if(que.size()>0) { que.erase(que.begin()); }
   ```
 
 다시 풀기!!!
+
+
+
+
+
+## 보행자 천국
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/1832)
+
+- 예제 테케는 다 맞았는데 제출용 테케 실패
+
+  ```cpp
+  #include <vector>
+  
+  using namespace std;
+  
+  int MOD = 20170805;
+  int dx[] = {1,0};
+  int dy[] = {0, 1};
+  int cnt =0;
+  
+  void dfs(int m,int n, int x, int y, int index, vector<vector<int> > c){
+      if(m-1 == x && y == n-1){
+          cnt = ++cnt % MOD;
+          return;
+      }
+      if(c[x][y] == 2){
+          int nx = x + dx[index];
+          int ny = y + dy[index];
+          if (nx >= m || ny >= n) return;
+          dfs(m,n,nx,ny,index,c);
+      }
+      else {
+          for(int i=0; i<2; i++){
+              int nx = x + dx[i];
+              int ny = y + dy[i];
+              if (nx >=m || ny >=n || nx < 0 || ny<0 || c[nx][ny] == 1) continue;
+              dfs(m,n,nx,ny,i,c);
+          }
+      }
+  }
+  
+  // 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
+  int solution(int m, int n, vector<vector<int>> city_map) {
+      dfs(m,n,0,0,0,city_map);
+      return cnt;
+  }
+  ```
+
+왜 틀린거인지 도무지 이해가 안감..
+
+[[프로그래머스\] 보행자천국](https://jayrightthere.tistory.com/entry/프로그래머스-보행자천국)
+
+DP를 이용하면 된다. DFS로도 될 것 같은데 왜 정확성 테스트에서 실패하는지 모르겠따...흠
+
+→ 다시 풀기
+
+
+
+## 가장 긴 팰린드롬
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/12904)
+
+- 25.2점 엥
+
+  ```cpp
+  #include <iostream>
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  string reverseString(string original){
+      vector<char> s;
+      for(int i=0; i<original.size(); i++){
+          s.push_back(original[i]);
+      }
+      string result = "";
+      while(!s.empty()){
+          result += s.back();
+          s.pop_back();
+      }
+      return result;
+  }
+  
+  int solution(string s)
+  {
+      int answer=0;
+      for(int i=1; i<s.size(); i++){
+          string tmp = s;
+          string original = tmp.substr(0,i+1);
+          if(original == reverseString(original)) answer = i+1;
+      }
+      return answer;
+  }
+  ```
+
+- 정확성은 다 맞고 효율성 테케 틀림
+
+  ```cpp
+  #include <iostream>
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  string reverseString(string original){
+      vector<char> s;
+      for(int i=0; i<original.size(); i++){
+          s.push_back(original[i]);
+      }
+      string result = "";
+      while(!s.empty()){
+          result += s.back();
+          s.pop_back();
+      }
+      return result;
+  }
+  
+  int solution(string s)
+  {
+      int answer=0;
+      for(int i=0; i<s.size(); i++){
+          int val =0;
+          for(int j=1; j<=s.size()-i; j++){
+              string tmp = s;
+              string original = tmp.substr(i,j);
+              if(original == reverseString(original)) val = j;
+          }
+          if(answer < val) answer = val;
+      }
+      
+      return answer;
+  }
+  ```
+
+- 효율성 하나만 틀림 왜 시간초과일까..
+
+  ```cpp
+  #include <iostream>
+  #include <string>
+  
+  using namespace std;
+  
+  bool isReverse(string origin){
+      string other = origin;
+      for(int i=0,j=other.size()-1; i<origin.size(),j>=0; i++,j--){
+          if(other[j] != origin[i]) return false;
+      }
+      return true;
+  }
+  
+  int solution(string s)
+  {
+      int answer=0;
+      for(int i=0; i<s.size(); i++){
+          int val =0;
+          for(int j=s.size()-i; j>=1; j--){
+              string tmp = s;
+              string original = tmp.substr(i,j);
+              if(isReverse(original)){
+                  val = j;
+                  break;
+              }
+          }
+          if(answer < val) answer = val;
+      }
+      
+      return answer;
+  }
+  ```
