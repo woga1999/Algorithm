@@ -1248,6 +1248,85 @@ DP를 이용하면 된다. DFS로도 될 것 같은데 왜 정확성 테스트�
 
 → 다시 풀기
 
+- DP 이용 ( 좀 이상..)
+
+  예제 2만 맞음
+
+  ```cpp
+  #include <vector>
+  
+  using namespace std;
+  
+  int MOD = 20170805;
+  int R[501][501];
+  int D[501][501];
+  
+  // 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
+  int solution(int m, int n, vector<vector<int>> city_map) {
+  	int answer = 0;
+  	if (city_map[0][1] == 0) {
+  		D[0][1] = 1;
+  	}
+  	if (city_map[1][0] == 0) {
+  		R[1][0] = 1;
+  	}
+  	for (int i = 1; i < city_map.size(); i++) {
+  		for (int j = 1; j < city_map[i].size(); j++) {
+  			if (city_map[i][j] == 0) {
+  				D[i][j] = (R[i][j - 1] + D[i - 1][j]) % MOD;
+  				R[i][j] = (R[i][j - 1] + D[i - 1][j]) % MOD;
+  			}
+  			else if (city_map[i][j] == 2) {
+  				D[i][j] = D[i - 1][j] % MOD;
+  				R[i][j] = R[i][j - 1] % MOD;
+  			}
+  		}
+  	}
+  	answer = (D[m - 1][n - 1] + R[m - 1][n - 1]) % MOD;
+  	return answer;
+  }
+  ```
+
+- 정답 DP (첨엔 실패였음 근데 초기화하니깐 성공함)
+
+  ```cpp
+  #include <vector>
+  
+  using namespace std;
+  
+  int MOD = 20170805;
+  int R[501][501];
+  int D[501][501];
+  
+  // 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
+  int solution(int m, int n, vector<vector<int>> city_map) {
+  	int answer = 0;
+       for (int i = 1; i <= m; i++) {
+          for (int j = 1; j <= n; j++) {
+              R[i][j] = D[i][j] = 0;
+          }
+      }
+       
+  	D[1][1] = R[1][1] = 1;
+  	for (int i = 1; i <=m; i++) {
+  		for (int j = 1; j <=n; j++) {
+  			if (city_map[i-1][j-1] == 0) {
+  				D[i][j] += (R[i][j - 1] + D[i - 1][j]) % MOD;
+  				R[i][j] += (R[i][j - 1] + D[i - 1][j]) % MOD;
+  			}
+  			else if (city_map[i-1][j-1] == 2) {
+  				D[i][j] = D[i - 1][j] % MOD;
+  				R[i][j] = R[i][j - 1] % MOD;
+  			}
+  		}
+  	}
+  	answer = (D[m - 1][n] + R[m][n - 1]) % MOD;
+  	return answer;
+  }
+  ```
+
+참고해서 풀긴 풀었는데 왜 저렇게 해야하는지.. 어렴풋이만 알겠음.
+
 
 
 ## 가장 긴 팰린드롬
@@ -1359,6 +1438,259 @@ DP를 이용하면 된다. DFS로도 될 것 같은데 왜 정확성 테스트�
           if(answer < val) answer = val;
       }
       
+      return answer;
+  }
+  ```
+
+
+
+## 거스름돈
+
+
+
+- 시도한 코드
+
+  냅색이나 동전교환 문제랑 비슷해서 첨엔 그 식대로 DP로 하다가 18이 나와서 다시 짬.
+
+  그래서 dfs 이용했는데 7이 나옴..
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  int cnt;
+  vector<int> val;
+  
+  void dfs(int index, int sum, int n) {
+  	if (sum == n) {
+  		cnt++;
+  		return;
+  	}
+  	for (int i = index; i < val.size(); i++) {
+  		dfs(i+1, sum + val[i], n);
+  	}
+  }
+  
+  int solution(int n, vector<int> money) {
+  
+  	for (int i = 0; i < money.size(); i++) {
+  		int having = money[i];
+  		int num = 1;
+  		int ans = 1;
+  		while (ans <= n) {
+  			ans = having * num;
+  			if (ans == n) {
+  				cnt++;
+  				break;
+  			}
+  			if(ans<n) val.push_back(ans);
+  			num++;
+  		}
+  	}
+  	dfs(0, 0, n);
+  	return cnt;
+  }
+  ```
+
+아.. 진짜 난 빠가다... ㅠㅜ 냅색 알고 때 썼던 거 그대로 쓰면 되는 거였음 ㅠㅜㅠㅜ
+
+냅색은 대신 가치가 있던 거고 얘는 걍 경우의 수니깐 dp[0] = 1로 두고 계산하면 되는 거였음..
+
+다른 사람 코드 참고해서 내 식대로 품
+
+- 만점
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  int dp[100001];
+  
+  int solution(int n, vector<int> money) {
+      int answer =0;
+      dp[0] = 1;
+     
+      for(int i=0; i<money.size(); i++){
+          for(int j=money[i]; j<=n; j++){
+              dp[j] += dp[j-money[i]] % 1000000007;
+          }
+      }
+      answer = dp[n];
+  	return answer;
+  }
+  ```
+
+
+
+## 블록 이동하기
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/60063)
+
+- 보기도 싫음.. 완전 노가다 코드 ㅠ 실패!
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <queue>
+  
+  using namespace std;
+  
+  int dir[][2] = { {1,1}, {1,-1}, {-1, -1},{-1,1} };
+  
+  struct robot {
+  	int x1, y1, x2, y2;
+  	int index, time;
+  };
+  
+  bool ch[101][101][101][101];
+  
+  int rotate(int index) {
+  	if (index == 3) {
+  		index = 0;
+  	}
+  	else {
+  		index++;
+  	}
+  	return index;
+  }
+  
+  int reRotate(int index) {
+  	if (index == 0) {
+  		index = 3;
+  	}
+  	else {
+  		index--;
+  	}
+  	return index;
+  }
+  
+  int solution(vector<vector<int>> board) {
+  	int answer = 987654321;
+  	int N = board.size();
+  	robot ro;
+  	ro.x1 = 0;
+  	ro.y1 = 0;
+  	ro.x2 = 0;
+  	ro.y2 = 1;
+  	ro.index = 0;
+  	ro.time = 0;
+  	queue<robot> q;
+  	q.push(ro);
+  	ch[0][0][0][1] = true;
+  	while (!q.empty()) {
+  		robot tmp = q.front();
+  		int x1 = tmp.x1;
+  		int y1 = tmp.y1;
+  		int x2 = tmp.x2;
+  		int y2 = tmp.y2;
+  		int index = tmp.index;
+  		int time = tmp.time;
+  		q.pop();
+  		if (x1 == N - 1 && y1 == N - 1 && answer > time) {
+  			answer = time;
+  		}
+  		if (x2 == N - 1 && y2 == N - 1 && answer > time) {
+  			answer = time;
+  		}
+  		for (int i = 0; i < 4; i++) {
+  			robot r;
+  			int rIndex = rotate(index);
+  			int nx1 = x1+dir[rIndex][0];
+  			int ny1 = y1+ dir[rIndex][1];
+  			int nx2 = x2+dir[rIndex][0];
+  			int ny2 = y2+dir[rIndex][1];
+  			if (nx1 >= 0 && ny1 >= 0 && nx1 < N && ny1 < N && !ch[nx1][ny1][x2][y2] && board[nx1][y1]==0) {
+  				r.x1 = nx1;
+  				r.y1 = ny1;
+  				r.x2 = x2;
+  				r.y2 = y2;
+  				r.index = rIndex;
+  				r.time = time + 1;
+  				ch[nx1][ny1][x2][y2] = true;
+  				q.push(r);
+  			}
+  			if (nx2 >= 0 && ny2 >= 0 && nx2 < N && ny2 < N && !ch[x1][y1][nx2][ny2] && board[nx2][y2] ==0) {
+  				r.x1 = x1;
+  				r.y1 = y1;
+  				r.x2 = nx2;
+  				r.y2 = ny2;
+  				r.index = rIndex;
+  				r.time = time + 1;
+  				ch[x1][y1][nx2][ny2] = true;
+  				q.push(r);
+  			}
+  		}
+  		for (int i = 0; i < 4; i++) {
+  			robot r;
+  			int rRIndex = reRotate(index);
+  			int rnx1 = x1 + dir[rRIndex][0];
+  			int rny1 = y2 + dir[rRIndex][1];
+  			int rnx2 = x2 + dir[rRIndex][0];
+  			int rny2 = y2 + dir[rRIndex][1];
+  			if (rnx1 >= 0 && rny1 >= 0 && rnx1 < N && rny1 < N && !ch[rnx1][rny1][x2][y2] && board[rnx1][y1] == 0) {
+  				r.x1 = rnx1;
+  				r.y1 = rny1;
+  				r.x2 = x2;
+  				r.y2 = y2;
+  				r.index = rRIndex;
+  				r.time = time + 1;
+  				ch[rnx1][rny1][x2][y2] = true;
+  				q.push(r);
+  			}
+  			if (rnx2 >= 0 && rny2 >= 0 && rnx2 < N && rny2 < N && !ch[x1][y1][rnx2][rny2] && board[rnx2][y2] == 0) {
+  				r.x1 = x1;
+  				r.y1 = y1;
+  				r.x2 = rnx2;
+  				r.y2 = rny2;
+  				r.index = rRIndex;
+  				r.time = time + 1;
+  				ch[x1][y1][rnx2][rny2] = true;
+  				q.push(r);
+  			}
+  		}
+  	}
+  	return answer;
+  }
+  ```
+
+아 정답 코드 보는데 회전만 신경 쓸게 아니라 로봇이 또 움직여야하는 걸 넣었어야..했다!
+
+*귀찮은* 난이도 높은 시뮬구현 문제 아닌가 싶다..
+
+[프로그래머스 [2020카카오공채\] 블록 이동하기 c++](https://regularmember.tistory.com/177)
+
+→ 다시 풀기!
+
+
+
+## 멀리 뛰기
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/12914)
+
+전형적 DP 문제
+
+- 정답~
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  long long dp[2001];
+  
+  long long solution(int n) {
+      long long answer = 0;
+      dp[0] = 1;
+      dp[1] = 1;
+      for(int i=2; i<=n; i++){
+          dp[i] = (dp[i-1] + dp[i-2]) % 1234567;
+      }
+      answer = dp[n];
       return answer;
   }
   ```
