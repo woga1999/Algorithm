@@ -1694,3 +1694,141 @@ DP를 이용하면 된다. DFS로도 될 것 같은데 왜 정확성 테스트�
       return answer;
   }
   ```
+
+
+
+## 기지국 설치
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/12979)
+
+- 단순하게 품.. 30점
+
+  ```cpp
+  #include <iostream>
+  #include <vector>
+  using namespace std;
+  
+  int solution(int n, vector<int> stations, int w)
+  {
+      int answer = 0;
+      vector<bool> ch(n+1, false);
+      for(int i=0; i<stations.size(); i++){
+          int index = stations[i];
+          ch[index] = true;
+          for(int i=1; i<=w; i++){
+              if(index -i >0){
+                  ch[index-i] = true;
+              }
+              if(index+i<=n){
+                  ch[index+i] = true;
+              }
+          }
+      }
+      int cnt=0;
+      for(int i=1; i<=n; i++){
+          if(!ch[i]){
+              cnt++;
+          }
+      }
+      answer = cnt / (w+1);
+      return answer;
+  }
+  ```
+
+- 약 DFS? 이용해서 풀었는데 정확성: 50 효율성 0
+
+  정확성에서 21 개 중에 6개 틀림.. 효율성은 4개인데 시간 초과 으아!
+
+  ```cpp
+  #include <iostream>
+  #include <vector>
+  using namespace std;
+  
+  int ans = 987654321;
+  
+  int checkAllTrue(vector<bool> ch, int n){
+      for(int i=1; i<=n; i++){
+          if(!ch[i]){
+              return i;
+          }
+      }
+      return -1;
+  }
+  
+  void dfs(int index, int w, int n, vector<bool> ch, int cnt){
+      if(index == -1){
+          if(cnt < ans) ans = cnt;
+          return;
+      }
+      if(index>n) return;
+      ch[index] = true;
+      for(int i=1; i<=w; i++){
+          if(index -i >0 && !ch[index-i]){
+              ch[index-i] = true;
+          }
+          if(index+i<=n && !ch[index+i]){
+              ch[index+i] = true;
+          }
+      } 
+      int nextIndex = checkAllTrue(ch,n);
+      if (nextIndex + w <= n && !ch[nextIndex + w] && nextIndex != -1) dfs(nextIndex + w, w, n, ch, cnt+1);
+  	else dfs(nextIndex, w, n, ch, cnt+1);
+  }
+  
+  int solution(int n, vector<int> stations, int w)
+  {
+      vector<bool> ch(n+1, false);
+      for(int i=0; i<stations.size(); i++){
+          int index = stations[i];
+          ch[index] = true;
+          for(int i=1; i<=w; i++){
+              if(index -i >0){
+                  ch[index-i] = true;
+              }
+              if(index+i<=n){
+                  ch[index+i] = true;
+              }
+          }
+      }
+      int minVal = 987654321;
+      for(int i=1; i<=n; i++){
+          if(!ch[i] && minVal > i){
+              minVal = i;
+          }
+      }
+      if(minVal + w <=n && !ch[minVal+w]) dfs(minVal+w, w,n,ch,0);
+      else dfs(minVal,w,n,ch,0);
+      return ans;
+  }
+  ```
+
+[171. 기지국설치(Programmers)](https://willbfine.tistory.com/381)
+
+- 그리디 문제이다. 정답 소스 : 개천재인듯
+
+  ```cpp
+  #include <iostream>
+  #include <vector>
+  using namespace std;
+  
+  int solution(int n, vector<int> stations, int w)
+  {
+      int ans = 0;
+      int index = 0;
+      int location = 1;
+      while(location<=n){
+          if(index<stations.size() && location>=stations[index]-w){
+              location = stations[index] + w + 1;
+              index++;
+          }else{
+              location += 2*w + 1;
+              ans++;
+          }
+      }
+      return ans;
+  }
+  ```
+
+→ 다시 풀기.. 프그에서는 정답을 내서 풀었다고 체크 되어 있겠지만 다시 풀자!
+
+어떻게 이런 천재적인 생각을 하지?!
