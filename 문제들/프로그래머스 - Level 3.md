@@ -1832,3 +1832,312 @@ DP를 이용하면 된다. DFS로도 될 것 같은데 왜 정확성 테스트�
 → 다시 풀기.. 프그에서는 정답을 내서 풀었다고 체크 되어 있겠지만 다시 풀자!
 
 어떻게 이런 천재적인 생각을 하지?!
+
+
+
+## 숫자 게임
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/12987)
+
+- 틀림.. 오름차순 정렬하고 비교했음
+
+  정확성: 23점
+
+  효율성: 0점
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  int solution(vector<int> A, vector<int> B) {
+      int answer = 0;
+      sort(A.begin(), A.end(), greater<int>());
+      sort(B.begin(), B.end(), greater<int>());
+      for(int i=0; i<A.size(); i++){
+          if(A[i] < B[i]) answer++;
+      }
+      return answer;
+  }
+  ```
+
+그리고 dfs로 조합 구하듯 했는데 틀리고 시간초과나고 장난아님..
+
+[[Lv3\] 숫자 게임](https://ydeer.tistory.com/65)
+
+정답 코드 참고해서 보는데 내가 생각한 처음 접근법이 맞았다 근데 왜 난.. 졸라 틀렸던 걸까?
+
+→ 알았다!!!! index 별로 비교해서 그럼 위 정답 소스는 A한테 이길 경우만 Bindex를 줄여서 갔다. 이길 가능성까지 계속 패를 큰거와 비교하는거임..
+
+단순하게 크고 작고를 비교해서는 안됐나보다 뭔 예외가 있던거 같은데 무슨 예외인지 모르겠다..
+
+쓸패는 버려라.. *A를 이길 수 있다면 써서 이기고(indexb--), 진다면 가장 왼편의 쓰레기를 가져올테니 이번 패는 안 쓰는거죠.*
+
+- 정답 소스
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  int solution(vector<int> A, vector<int> B) {
+      int ans = 0;
+      sort(A.begin(), A.end());
+      sort(B.begin(), B.end());
+      int N = A.size();
+      int a = N-1;
+      int b = N-1;
+      while(a>=0){
+          int aVal = A[a];
+          int bVal = B[b];
+          if(bVal > aVal){
+              b--;
+              ans++;
+          }
+          a--;
+      }
+      return ans;
+  }
+  ```
+
+허무쓰.. 흠.. 다시 풀어보기
+
+
+
+## N-Queen
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/12952)
+
+- 정답 근데 약간 너무 코드 이상한듯..>?
+
+  효율 없게 짠거같다... dfs를 이용해줬고 문제는 check 배열 true 와 false 였다. 굉장히 많은 시간을 소비함.. 비쥬얼스튜디오에서 디버깅 엄청 돌려서 알아냈다..
+
+  그리고 n 범위가 작기 때문에 이런식으로 푼거다 완탐+dfs!
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  
+  int board[13][13];
+  int ans = 0;
+  bool ch[13][13];
+  int N;
+  
+  void checkTrue(int row, int col) {
+  	for (int i = 0; i < N; i++) {
+  		ch[col][i] = true;
+  		ch[i][row] = true;
+  		if(row+i <N && col+i<N)ch[col+i][row+i] = true;
+  		if (row - i >= 0 && col - i >= 0) ch[col - i][row - i] = true;
+  		if (row - i >= 0 && col + i < N) ch[col + i][row - i] = true;
+  		if (row + i < N && col - i >= 0) ch[col - i][row + i] = true;
+  	}
+  }
+  void checkFalse() {
+  	for (int i = 0; i < N; i++) {
+  		for (int j = 0; j < N; j++) {
+  			ch[i][j] = false;
+  		}
+  	}
+  	vector<pair<int, int> > point;
+  	for (int i = 0; i < N; i++) {
+  		for (int j = 0; j < N; j++) {
+  			if (board[i][j] == 1) {
+  				point.push_back({ i,j });
+  			}
+  		}
+  	}
+  	for (int i = 0; i < point.size(); i++) {
+  		checkTrue(point[i].second, point[i].first);
+  	}
+  }
+  
+  void dfs(int qCnt, int col) {
+  	if (qCnt == N) {
+  		ans++;
+  		return;
+  	}
+  	for (int row = 0; row < N; row++) {
+  		if (ch[col][row]) continue;
+  		board[col][row] = 1;
+  		checkTrue(row, col);
+  		dfs(qCnt + 1, col + 1);
+  		board[col][row] = 0;
+  		checkFalse();
+  	}
+  }
+  
+  int solution(int n) {
+  	N = n;
+  	dfs(0, 0);
+  	return ans;
+  }
+  ```
+
+ㅋㅋ.. 나왜케 빡세게 푼거지??
+
+아 어차피 col를 따로 체크하니깐 행은 필요없고 열만 계속 true하면 됐었구나..
+
+[N-Queen 알고리즘](http://sooyoung32.github.io/dev/2016/03/14/n-queen-algorithm.html)
+
+이분 코드 깔끔..
+
+
+
+## 배달
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/12978)
+
+- bfs로 풀었는데 40점 맞음
+
+  뒤로 가서는 segmentation fault 나고 실패함 이유 = map의 범위 50이 아니라 51이여야함
+
+  ```cpp
+  #include <iostream>
+  #include <vector>
+  #include <queue>
+  
+  using namespace std;
+  
+  bool vill[51];
+  
+  int solution(int N, vector<vector<int> > road, int K) {
+      int ans = 0;
+      vector<int> map[50][50];
+      for(int i=0; i<road.size(); i++){
+          map[road[i][0]][road[i][1]].push_back(road[i][2]);
+          map[road[i][1]][road[i][0]].push_back(road[i][2]);
+      }
+      queue<pair<int,int> > q;
+      vill[1] = true;
+      for(int i=2; i<=N; i++){
+          if(map[1][i].size() != 0){
+              for(int j=0; j<map[1][i].size(); i++){
+                  q.push({i,map[1][i][j]});
+              }
+          }
+      }
+      while(!q.empty()){
+          int next = q.front().first;
+          int val = q.front().second;
+          q.pop();
+          vill[next] = true;
+          for(int i=1; i<=N; i++){
+              if(map[next][i].empty() || vill[i]) continue;
+              for(int j=0; j<map[next][i].size(); i++){
+                  if(map[next][i][j] + val <= K){
+                      q.push({i, map[next][i][j]+val});
+                  }
+              }
+          }
+      }
+      for(int i=1; i<=N; i++){
+          if(vill[i]) ans++;
+      }
+      return ans;
+  }
+  ```
+
+- 인접리스트가 아니라 인접행렬도 도로 수가 많으면 작은 양으로 함 46점 ㅠ
+
+  ```cpp
+  #include <iostream>
+  #include <vector>
+  #include <queue>
+  
+  using namespace std;
+  
+  int map[50][50];
+  bool vill[51];
+  
+  int solution(int N, vector<vector<int> > road, int K) {
+      int ans = 0;
+      for(int i=0; i<road.size(); i++){
+          if(map[road[i][0]][road[i][1]] > 0 && map[road[i][0]][road[i][1]] > road[i][2]){
+              map[road[i][0]][road[i][1]] = road[i][2];
+              map[road[i][1]][road[i][0]] = road[i][2];
+          }else if(map[road[i][0]][road[i][1]] == 0){
+              map[road[i][0]][road[i][1]] = road[i][2];
+              map[road[i][1]][road[i][0]] = road[i][2]; 
+          }
+      }
+      queue<pair<int,int> > q;
+      vill[1] = true;
+      for(int i=2; i<=N; i++){
+          if(map[1][i] != 0) q.push({i,map[1][i]});
+      }
+      while(!q.empty()){
+          int next = q.front().first;
+          int val = q.front().second;
+          q.pop();
+          vill[next] = true;
+          for(int i=1; i<=N; i++){
+              if(map[next][i] ==0 || vill[i]) continue;
+              if(map[next][i] + val <= K){
+                  q.push({i, map[next][i]+val});
+              }
+          }
+      }
+      for(int i=1; i<=N; i++){
+          if(vill[i]) ans++;
+      }
+      return ans;
+  }
+  ```
+
+답을 찾아보니깐 다익스트라 알고리즘을 이용한다고 한다. 다익스트라인줄 몰랐던데 최단 거리가 아니라서 걍 값만 안넘으면 되는 줄 알았다..흠
+
+- 다익스트라 이용해서 통과
+
+  ```cpp
+  #include <iostream>
+  #include <vector>
+  #include <queue>
+  
+  using namespace std;
+  
+  bool check[51];
+  int dist[51];
+  vector<pair<int,int>> a[51];
+  
+  int solution(int N, vector<vector<int> > road, int K) {
+      int ans=0;
+      for(int i=0; i<road.size(); i++){
+          a[road[i][0]].push_back({road[i][1],road[i][2]});
+          a[road[i][1]].push_back({ road[i][0],road[i][2] });
+      }
+      for(int i=0; i<=N; i++) dist[i] = 987654321;
+      dist[1] = 0;
+      for(int i=1; i<=N; i++){
+          int minIndex =0;
+          for(int j=1; j<=N; j++){
+              if(!check[j] && dist[j] < dist[minIndex]) minIndex = j;
+          }
+          check[minIndex] = true;
+          for(int j=0; j<a[minIndex].size(); j++){
+              int nextNode = a[minIndex][j].first;
+              int val = a[minIndex][j].second;
+              if(dist[nextNode] > dist[minIndex]+val){
+                  dist[nextNode] = dist[minIndex]+val;
+              }
+          }
+      }
+      for(int i=1; i<=N; i++){
+          if(dist[i] <=K) ans++;
+      }
+      return ans;
+  }
+  ```
+
+→ 다익스트라 코드 포고 품.. 안보고도 풀 수 있게 해야함, 다시 풀기!
+
+
+
+
+
