@@ -2141,3 +2141,267 @@ DP를 이용하면 된다. DFS로도 될 것 같은데 왜 정확성 테스트�
 
 
 
+## 야근 지수
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/12927)
+
+- 대충 풀었더니 역시 안되죠~ 26점
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  long long solution(int n, vector<int> works) {
+      long long answer = 0;
+      int index = 0;
+      sort(works.begin(), works.end(), greater<int>());
+      while(n--){
+          if(index == works.size()) index = 0;
+          if(works[index] > 0){
+              works[index]--;
+          }
+          index++;
+      }
+      for(int i=0; i<works.size(); i++){
+          long long val = works[i] * works[i];
+          answer += val;
+      }
+      return answer;
+  }
+  ```
+
+뭘해도 안되길래 검색했다 요지는 최대값을 없애는 것.. 와우
+
+[프로그래머스 문제풀이 level3 - 야근 지수 | rajephon's blog](https://blog.rajephon.dev/2018/10/14/programmers-solution-level3-no-overtime/)
+
+와.. 이렇게 생각해야하는 구나 근데 어떻게 이렇게 생각해 ㅋㅋ
+
+- 정답 소스
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  #include <queue>
+  
+  using namespace std;
+  
+  long long solution(int n, vector<int> works) {
+      long long answer = 0;
+      priority_queue<int, vector<int>, less<int>> pq;
+      for(int i=0; i<works.size(); i++){
+          pq.push(works[i]);
+      }
+      while(n--){
+          if(pq.empty()) break;
+          int top = pq.top();
+          pq.pop();
+          top--;
+          if(top >0) pq.push(top);
+      }
+      while(!pq.empty()){
+          long long val = pq.top() * pq.top();
+          pq.pop();
+          answer += val;
+      }
+      
+      return answer;
+  }
+  ```
+
+**for문으로 안 넣고 \*priority_queue q(works.begin(), works.end());\* 이렇게 초기화 가능**
+
+
+
+## 줄 서는 방법
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/12936)
+
+- dfs로 풀었는데 효율성에서 시간초과남..
+
+  63점.. n이 20이하라 괜찮을 줄 알았는데 무리였나보다 (정확성에서도 2개가 시간초과)
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  vector<vector<int>> ans;
+  bool ch[21];
+  
+  void dfs(int cnt, vector<int> result, int n){
+      if(cnt==n){
+          ans.push_back(result);
+          return;
+      }
+      for(int i=1; i<=n; i++){
+          if(ch[i]) continue;
+          ch[i] = true;
+          result.push_back(i);
+          dfs(cnt+1, result, n);
+          ch[i] = false;
+          result.pop_back();
+      }
+  }
+  vector<int> solution(int n, long long k) {
+      vector<int> answer;
+      dfs(0,{},n);
+      sort(ans.begin(), ans.end());
+      for(int i=0; i<ans[k-1].size(); i++){
+          answer.push_back(ans[k-1][i]);
+      }
+      return answer;
+  }
+  ```
+
+규칙이 있어서 그걸 캐치하고 계산해서 푸는 문제였다; 지금은 졸려서 머리가 안돌아가니깐 자고 일어나서 다시 풀기
+
+
+
+## 최고의 집합
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/12938)
+
+- 80점.. 효율성에서 4개 틀림..
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  vector<int> solution(int n, int s) {
+      vector<int> answer;
+      int etc = s % n;
+      int val = s / n;
+      if(val ==0){
+          return {-1};
+      }
+      for(int i=0; i<n; i++){
+          answer.push_back(val);
+      }
+      if(etc>0){
+          int index =0;
+          for(int i=0; i<etc; i++){
+              if(index == n) index =0;
+              answer[index]++;
+              index++;
+          }
+      }
+      sort(answer.begin(), answer.end());
+      return answer;
+  }
+  ```
+
+- 우선순위 큐로 최소를 뿔려봤는데 오히려 효율성 5개틀린다
+
+  코드도 드러움..
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  #include <queue>
+  
+  using namespace std;
+  
+  vector<int> solution(int n, int s) {
+      vector<int> answer,tmp;
+      int etc = s % n;
+      int val = s / n;
+      if(val ==0){
+          return {-1};
+      }
+      for(int i=0; i<n; i++){
+          answer.push_back(val);
+      }
+      if(etc>0){
+          priority_queue<int, vector<int>, greater<int>> pq(answer.begin(), answer.end());
+          while(etc--){
+              int val = pq.top();
+              pq.pop();
+              pq.push(val+1);
+          }
+          while(!pq.empty()){
+              tmp.push_back(pq.top());
+              pq.pop();
+          }
+      }
+      if(!tmp.empty()){
+          for(int i=0; i<n; i++){
+              answer[i] = tmp[i];
+          }
+      }
+      return answer;
+  }
+  ```
+
+- 정답 소스
+
+  와 ㅋㅋ 문제는 sort 이용해서 효율성에서 오류난거였음.. sort가 logn인데 그래도 또 만개를 또 이용하는 건 시간을 잡아먹나..보다.. index 범위 신경쓴것도 지웠음 왜냐면 n개를 넘을 정도면 나뉘어졌을테니깐ㅋㅋ 코드짜면서도 슬쩍 생각했는데 노파심에 추가했더니ㅠ
+
+  그리고 오히려 index++하고 sorting 하니깐 우선순위 큐 이용한거처럼 효율성 더 틀려서 나옴
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  #include <algorithm>
+  
+  using namespace std;
+  
+  vector<int> solution(int n, int s) {
+      vector<int> answer;
+      int etc = s % n;
+      int val = s / n;
+      if(val ==0){
+          return {-1};
+      }
+      for(int i=0; i<n; i++){
+          answer.push_back(val);
+      }
+      if(etc>0){
+          int index =n-1;
+          for(int i=0; i<etc; i++){
+              answer[index--]++;
+          }
+      }
+      return answer;
+  }
+  ```
+
+
+
+## 하노이의 탑
+
+[프로그래머스](https://programmers.co.kr/learn/courses/30/lessons/12946)
+
+- 정답 소스
+
+  ```cpp
+  #include <string>
+  #include <vector>
+  
+  using namespace std;
+  vector<vector<int>> answer;
+  
+  void hanoi(int n, int start, int to,int mid){
+      if(n==1){
+          answer.push_back({start,to});
+          return;
+      }
+      else{
+          hanoi(n-1, start,mid,to);
+          answer.push_back({start,to});
+          hanoi(n-1, mid,to, start);
+      }
+  }
+  vector<vector<int>> solution(int n) {
+      hanoi(n,1,3,2);
+      return answer;
+  }
+  ```
